@@ -30,7 +30,11 @@ namespace HTTP
         public static bool VerboseLogging = false;
 
 		public CookieJar cookieJar = CookieJar.Instance;
-		public string method = "GET";
+		private string _method = "GET";
+		public string method {
+			get { return _method != null ? _method : "GET" ; }
+			set { _method = value.ToUpper(); }
+		}
 		public string protocol = "HTTP/1.1";
 		public byte[] bytes;
 		public Uri uri;
@@ -49,6 +53,34 @@ namespace HTTP
 
 		Dictionary<string, List<string>> headers = new Dictionary<string, List<string>> ();
 		static Dictionary<string, string> etags = new Dictionary<string, string> ();
+
+		public Request (string method, string uri, Dictionary<string,string> parameters)
+		{
+			this.method = method;
+
+			if(String.Equals( this.method ,"GET"))
+			{
+				string paramsString = "";
+				foreach (var __item in parameters) 
+				{
+					paramsString += ((paramsString.Length == 0)?"?":"&") + WWW.EscapeURL(__item.Key) + "=" + WWW.EscapeURL(__item.Value);
+				}
+				this.uri = new Uri (uri + paramsString);
+			}else{
+				WWWForm form = new WWWForm();
+				foreach (var item in parameters) 
+				{
+					form.AddField( item.Key, item.Value );;
+				}
+				this.bytes = form.data;
+				foreach ( DictionaryEntry entry in form.headers )
+				{
+					this.AddHeader( (string)entry.Key, (string)entry.Value );
+				}
+				this.uri = new Uri (uri);
+			}
+
+		}
 
 		public Request (string method, string uri)
 		{
