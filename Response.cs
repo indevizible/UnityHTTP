@@ -218,7 +218,13 @@ namespace HTTP
                             else
                                 chunks.Add (output.ToArray ());
                         }
-                        output.SetLength (0);
+						try {
+							output.SetLength (0);
+						} catch (Exception ex) {
+							Debug.Log (ex);
+						}
+                     
+						Debug.Log ("XYZ");
                         //forget the CRLF.
                         inputStream.ReadByte ();
                         inputStream.ReadByte ();
